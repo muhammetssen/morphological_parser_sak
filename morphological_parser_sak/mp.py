@@ -7,6 +7,7 @@ import sys
 import re
 import TurkishMorphology
 import subprocess
+import flask
 import logging
 import os
 from websocket import create_connection
@@ -94,22 +95,10 @@ def disambiguate(parsed_text):
     result = ws.recv()
     return result
 
-if __name__ == '__main__':
-    try:
-        init()
-        while True:
-            inp = input()
-            if inp == "q":
-                break
-            else:
-                parsed_text = parse_lines(inp)
-                result = disambiguate(parsed_text)
-                logging.debug(result)
-        ws.close()
+def evaluate(text):
+	parsed_text = parse_lines(inp)
+	result = disambiguate(parsed_text)
+	return result
 
-    except KeyboardInterrupt:
-        ws.close()
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+def clear():
+	ws.close()
