@@ -15,6 +15,8 @@
 use strict;
 use utf8;
 use open ":utf8";
+use Net::WebSocket::Server;
+
 $| = 1;
 
 binmode STDIN, ":utf8";
@@ -25,137 +27,40 @@ my %w;
 my %avgw;
 my %counts;
 
-if (@ARGV != 3 && @ARGV != 4)
-{
-	print "usage: md.pl -train train_set[in] dev_set[in] model[out]\n";
-	print "usage: md.pl -test model[in] test_set[in]\n";	
-	print "usage: md.pl -disamb model[in] amb_set[in] unamb_set[out]\n";
-	print "please use utf-8 encoding for input files\n";
-	exit(-1);
-}
-
+# INITIALIZATION
 srand(792349);
+load_model("model.txt");
 
-if ($ARGV[0] eq "-train")
-{
-	train($ARGV[1], $ARGV[2], $ARGV[3]);
-}
-elsif ($ARGV[0] eq "-test")
-{
-	load_model($ARGV[1]);
-	my $accuracy = test($ARGV[2]);
-	print "accuracy = ", $accuracy, "\n";
-}
-elsif ($ARGV[0] eq "-disamb")
-{
-	load_model($ARGV[1]);
-	disamb($ARGV[2], $ARGV[3]);
-}
+Net::WebSocket::Server->new(
+    listen => 34215,
+    on_connect => sub {
+        my ($serv, $conn) = @_;
+        $conn->on(
+            utf8 => sub {
+                my ($conn, $msg) = @_;
+                my $disamb_text = disamb($msg);
+                $conn->send_utf8($disamb_text);
+            },
+        );
+    },
+)->start;
 
-sub train
-{
-	my ($train_file, $dev_file, $model_file) = @_;
-	$num_examples = 0;
-	for (my $iter = 1; $iter <= 4; ++$iter)
-	{
-		one_pass($train_file);
-		my $accuracy = test($dev_file);
-		print "$iter. iter: $accuracy\n";
-	}
-	#update averaged perceptron weights and save
-	save_model($model_file);
-}
-
-sub one_pass
-{
-	my ($train_file) = @_;
-	my $TRAIN;
-	open($TRAIN, $train_file) || die("cannot open file: $train_file\n");
-	my $line;
-	my @words;
-	my @correct_parse;
-	my @allparses;
-
-	while (1)
-	{
-		my ($done, $ntoken) = read_sentence($TRAIN, \@words, \@correct_parse, \@allparses);
-		last if ($done);
-		++$num_examples;		
-		my ($best_score, @best_parse) = best_parse(0, @allparses);		
-		my %feat_correct;
-		if ("@correct_parse" eq "@best_parse")
-		{
-			next;
-		}
-		extract_features(\%feat_correct, @correct_parse);
-		my %feat_best;
-		extract_features(\%feat_best, @best_parse);
-		update_model(\%feat_correct, \%feat_best);
-	}
-	close($TRAIN);
-	foreach my $feat (keys %avgw)
-	{
-		$avgw{$feat} = ($avgw{$feat} * $counts{$feat} + ($num_examples - $counts{$feat}) * $w{$feat})/$num_examples;
-		$counts{$feat} = $num_examples;
-	}
-}
-
-sub test
-{
-	my ($test_file) = @_;
-
-	my $TEST;
-	open($TEST, $test_file) || die("cannot open file: $test_file\n");
-	my $line;
-	my @words;
-	my @correct_parse;
-	my @allparses;
-	my $errors = 0;
-	my $num_token = 0;
-
-	while (1)
-	{
-		my ($done, $ntoken) = read_sentence($TEST, \@words, \@correct_parse, \@allparses);
-		$num_token += $ntoken;
-		last if ($done);
-		my ($best_score, @best_parse) = best_parse(1, @allparses);
-
-		for (my $i = 0; $i < @correct_parse; ++$i)
-		{
-			if ($correct_parse[$i] ne $best_parse[$i])
-			{
-				++$errors;
-			}
-		}
-	}
-	close($TEST);
-	if ($num_token > 0)
-	{
-		return 100*($num_token-$errors)/$num_token;
-	}
-	return 0;
-}
 
 sub disamb
 {
-	my ($amb_file, $unamb_file) = @_;
-
-	my $TEST;
-	open($TEST, $amb_file) || die("cannot open file: $amb_file\n");
-
-	my $OUT;
-	open($OUT, ">$unamb_file") || die("cannot open file: $unamb_file\n");
+	my ($amb_text) = @_;
 
 	my @words;
 	my @allparses;
 
-	my $line;
-	while ($line = <$TEST>)
+	my $result = "";
+	my @lines = split /\n/, $amb_text;
+	for my $line (@lines)
 	{
 		chomp($line);
 		if ($line =~ /<DOC>/ || $line =~ /<\/DOC>/ || $line =~ /<TITLE>/ || $line =~ /<\/TITLE>/ || $line =~ /<S>/)
 		{
-			print $OUT "$line\n";
+			$result .= "$line\n";
 			next;
 		}
 		if ($line =~ /<\/S>/)
@@ -163,18 +68,18 @@ sub disamb
 			my ($best_score, @best_parse) = best_parse(1, @allparses);
 			for (my $i = 0; $i < @words; ++$i)
 			{
-				print $OUT "$words[$i] $best_parse[$i]";
+				$result .= "$words[$i] $best_parse[$i]";
 				my @parses = split(/\s+/, $allparses[$i]);
 				foreach my $p (@parses)
 				{
 					if ($p ne $best_parse[$i])
 					{
-						print $OUT " $p";
+						$result .= " $p";
 					}
 				}
-				print $OUT "\n";
+				$result .= "\n";
 			}
-			print $OUT "$line\n";
+			$result .= "$line\n";
 			@words = ();
 			@allparses = ();
 			next;
@@ -183,8 +88,7 @@ sub disamb
 		push(@words, shift(@tokens));
 		push(@allparses, "@tokens");
 	}
-	close($TEST);
-	close($OUT);
+	return $result;
 }
 
 sub best_parse
@@ -359,45 +263,6 @@ sub ascore
 	return $score;
 }
 
-sub update_model
-{
-	my ($feat_corr, $feat_best) = @_;
-
-	my %featset;
-	foreach my $feat (keys %{$feat_corr})
-	{
-		$featset{$feat} = 1;
-	}
-	foreach my $feat (keys %{$feat_best})
-	{
-		$featset{$feat} = 1;
-	}
-	foreach my $feat (keys %featset)
-	{
-		$avgw{$feat} = ($avgw{$feat} * $counts{$feat} + ($num_examples - $counts{$feat}) * $w{$feat})/$num_examples;
-		$counts{$feat} = $num_examples;
-		$w{$feat} += $feat_corr->{$feat} - $feat_best->{$feat};
-		if ($avgw{$feat} == 0)
-		{
-			delete $avgw{$feat};
-		}
-		if ($w{$feat} == 0)
-		{
-			delete $w{$feat};
-		}
-	}
-}
-
-sub save_model
-{
-	my ($model) = @_;
-	open(MODEL, "> $model") || die("cannot open file: $model\n");
-	foreach my $feat (keys %avgw)
-	{
-		print MODEL "$avgw{$feat} $feat\n";
-	}
-	close(MODEL);
-}
 
 sub load_model
 {
@@ -414,35 +279,4 @@ sub load_model
 		$avgw{$feat} = $weight;
 	}
 	close(MODEL);
-}
-
-sub read_sentence
-{
-	my ($FILE, $words, $correct_parse, $allparses) = @_;
-	@{$words} = ();	
-	@{$correct_parse} = ();
-	@{$allparses} = ();
-
-	my $num_tokens = 0;
-	my $line;
-	while ($line = <$FILE>)
-	{
-		chomp($line);
-		++$num_tokens;
-		next if ($line =~ /<DOC>/);
-		next if ($line =~ /<\/DOC>/);
-		next if ($line =~ /<TITLE>/);
-		next if ($line =~ /<\/TITLE>/);
-		next if ($line =~ /<S>/);
-
-		if ($line =~ /<\/S>/)
-		{
-			return (0, $num_tokens);
-		}
-		my @tokens = split(/\s+/, $line);
-		push(@{$words}, shift(@tokens));
-		push(@{$correct_parse}, $tokens[0]);
-		push(@{$allparses}, "@tokens");
-	}
-	return (1, $num_tokens);
 }
