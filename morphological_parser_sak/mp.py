@@ -96,7 +96,7 @@ def disambiguate(parsed_text):
     return result
 
 def evaluate(text):
-	parsed_text = parse_lines(inp)
+	parsed_text = parse_lines(text)
 	result = disambiguate(parsed_text)
 	return result
 

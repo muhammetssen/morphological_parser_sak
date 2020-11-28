@@ -1,4 +1,4 @@
-from flask import Flask, json, g, request
+from flask import Flask, json, g, request, jsonify
 import mp
 import atexit
 
@@ -15,4 +15,4 @@ def evaluate():
     json_data = json.loads(request.data)
     input_text = json_data["query"]
     result = mp.evaluate(input_text)
-    return json_response({"result": result}, 200)
+    return jsonify(result=result)
