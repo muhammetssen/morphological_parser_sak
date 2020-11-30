@@ -7,7 +7,7 @@ mp.init()
 app = Flask(__name__)
 
 def clear():
-    mp.clear()
+    mp.cleanup()
 atexit.register(clear)
 
 @app.route("/evaluate", methods=["POST"])

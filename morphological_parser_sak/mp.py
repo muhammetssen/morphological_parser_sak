@@ -48,7 +48,7 @@ def check_perl():
     poll = perl_proc.poll()
     if poll is not None:
           # re-swapn the process
-          logging.debug("WARNING: Perl process is dies for some reason. Restarting.")
+          logging.debug("WARNING: Perl process is died for some reason. Restarting.")
           init_perl()
 
 def init_fst():
@@ -61,6 +61,13 @@ Initialize everything
 def init():
     init_fst()
     init_perl()
+
+def cleanup():
+    if ws:
+        ws.close()
+    if perl_proc:
+        perl_proc.terminate()
+
 
 """
 Returns list of lists: where each list is morphological parses of a sentence
@@ -90,9 +97,13 @@ def parse_lines(text):
 Call perl routines for disambiguation
 """
 def disambiguate(parsed_text):
-    check_perl()
-    ws.send(parsed_text)
-    result = ws.recv()
+    try:
+        ws.send(parsed_text)
+        result = ws.recv()
+    except:
+        # the process might have died
+        check_perl()
+        return disambiguate(parsed_text)
     return result
 
 def evaluate(text):
@@ -102,3 +113,16 @@ def evaluate(text):
 
 def clear():
 	ws.close()
+
+
+def debug():
+    while True:
+        inp = input("INPUT: ")
+        if inp == "q":
+            break
+        else:
+            print(evaluate(inp))
+
+if __name__ == '__main__':
+    init()
+    debug()
