@@ -33,7 +33,7 @@ DISAMB_PORT = 34215
 perl_script = "md.pl"
 uri = "ws://{}:{}/websocket".format(DISAMB_ADDR, DISAMB_PORT)
 perl_proc = None
-DEBUG = True # TODO
+DEBUG = False 
 ws = None
 
 with pkg_resources.path(__package__, "turkish.fst") as p:
@@ -122,7 +122,7 @@ def disambiguate(parsed_text):
     except:
         # the process might have died
         check_perl()
-        time.sleep(0.1)
+        time.sleep(0.5)
         return disambiguate(parsed_text)
     return result
 
