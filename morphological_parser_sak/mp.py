@@ -15,14 +15,10 @@ import asyncio
 import time
 from websocket import create_connection
 
-# importlib.resources.path
 try:
     import importlib.resources as pkg_resources
 except ImportError:
-    # Try backported to PY<37 `importlib_resources`.
     import importlib_resources as pkg_resources
-
-
 
 """
 This is supposed to run in a container. The port selection is arbitrary
@@ -91,10 +87,9 @@ def cleanup():
 """
 Returns list of lists: where each list is morphological parses of a sentence
 """
-def parse_lines(text):
+def parse_lines(lines):
     logging.debug("Parsing...")
     parsed_text = ""
-    lines = [x for x in text.strip().split("\n") if x]
     for line in lines:
         parsed_text += "<S> <S>+BSTag\n" 
         line = line.rstrip()
@@ -127,8 +122,24 @@ def disambiguate(parsed_text):
     return result
 
 def evaluate(text):
-    parsed_text = parse_lines(text)
-    result = disambiguate(parsed_text)
+    result = ""
+    threshold = 2**10
+    msg_arr = []
+    msg_size = 0
+    lines = [x for x in text.strip().split("\n") if x]
+    for i, line in enumerate(lines):
+        msg_size += len(line)
+        if msg_size >= threshold:
+            parsed_text = parse_lines(msg_arr)
+            result += disambiguate(parsed_text)
+            msg_size = len(line)
+            msg_arr = []
+        msg_arr.append(line)
+
+    if msg_arr:
+        parsed_text = parse_lines(msg_arr)
+        result += disambiguate(parsed_text)
+    
     return result
 
 def debug():
