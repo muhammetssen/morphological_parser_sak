@@ -15,6 +15,7 @@
 use strict;
 use utf8;
 use open ":utf8";
+use lib qw(./perl_dependencies/websocket_perl/share/perl/5.22.1/);
 use Net::WebSocket::Server;
 
 $| = 1;

@@ -1,5 +1,5 @@
 from flask import Flask, json, g, request, jsonify
-import mp
+import morphological_parser_sak.mp as mp
 import atexit
 
 
