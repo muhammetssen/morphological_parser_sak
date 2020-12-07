@@ -5,7 +5,7 @@
 
 import sys
 import re
-import TurkishMorphology
+import morphological_parser_sak.TurkishMorphology as TurkishMorphology
 import subprocess
 import flask
 import logging
