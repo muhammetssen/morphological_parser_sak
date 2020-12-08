@@ -69,7 +69,8 @@ def parse_lines(lines):
     return parsed_text
 
 def evaluate(text):
-    parsed_text = parse_lines(text)
+    lines = [line for line in text.split("\n") if line]
+    parsed_text = parse_lines(lines)
     result = md.disamb(parsed_text)
     return result
 
