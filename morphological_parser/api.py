@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from flask import Flask, json, g, request, jsonify
 import morphological_parser.mp as mp
 import atexit
@@ -16,3 +19,6 @@ def evaluate():
     input_text = json_data["query"]
     result = mp.evaluate(input_text)
     return jsonify(result=result)
+
+if __name__ == "__main__":
+   app.run(host='0.0.0.0')
