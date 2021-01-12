@@ -74,6 +74,43 @@ def evaluate(text):
     result = md.disamb(parsed_text)
     return result
 
+def get_parses_dict(text):
+    output = evaluate(text)
+    parses = {"sentences": []}
+    sentence = list()
+    for l in output.split("\n"):
+        if ("<S>" in l):
+            continue
+        elif ("</S>" in l):
+            parses["sentences"].append(sentence)
+            sentence = list()
+            continue
+        word, *parses_word = l.split(" ")
+        all_parses_word = {"word": word, "parses": []}
+        for parse_word in parses_word:
+            # do sanity checks
+            if word == parse_word[: len(word)]:
+                lemma = word
+                rest = parse_word[len(word):]
+                pos_index = rest.index("]")+1
+                lemma += rest[: pos_index]
+                suffixes = re.split(r"\+|-", rest[pos_index: ])
+                l = [lemma]+suffixes
+            else:
+                l = re.split(r"\+|-", parse_word)
+            all_parses_word["parses"].append(l)
+        sentence.append(all_parses_word)
+    return parses
+
+def pprint(parses):
+    for sentence in parses["sentences"]:
+        for word_dict in sentence:
+            word, parses_word = word_dict["word"], word_dict["parses"]
+            print(word)
+            for parses_word in parses_word:
+                print("\t" + " ".join(parses_word))
+        print("-"*50)
+
 def debug():
     while True:
         inp = input("INPUT: ")
