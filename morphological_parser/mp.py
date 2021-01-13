@@ -76,13 +76,13 @@ def evaluate(text):
 
 def get_parses_dict(text):
     output = evaluate(text)
-    parses = {"sentences": []}
+    parses = []
     sentence = list()
     for l in output.split("\n"):
         if ("<S>" in l):
             continue
         elif ("</S>" in l):
-            parses["sentences"].append(sentence)
+            parses.append(sentence)
             sentence = list()
             continue
         word, *parses_word = l.split(" ")
