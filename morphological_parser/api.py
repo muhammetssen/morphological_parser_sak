@@ -16,8 +16,10 @@ atexit.register(clear)
 @app.route("/evaluate", methods=["POST"])
 def evaluate():
     json_data = json.loads(request.data)
-    input_text = json_data["query"]
-    result = mp.get_parses_dict(input_text)
+    input_text = json_data["textarea"]
+    parses = mp.get_parses_dict(input_text)
+    parses_str = mp.pprint_str(parses)
+    result = {"text": parses_str}
     response = app.response_class(
         response=json.dumps(result),
         status=200,

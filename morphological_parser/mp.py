@@ -102,14 +102,19 @@ def get_parses_dict(text):
         sentence.append(all_parses_word)
     return parses
 
-def pprint(parses):
+def pprint_str(parses):
+    ret = ""
     for sentence in parses["sentences"]:
         for word_dict in sentence:
             word, parses_word = word_dict["word"], word_dict["parses"]
-            print(word)
+            ret += word + "\n"
             for parses_word in parses_word:
-                print("\t" + " ".join(parses_word))
-        print("-"*50)
+                ret += ("\t" + " ".join(parses_word) + "\n")
+        ret += ("-"*50)
+    return ret
+
+def pprint(parses):
+    print(pprint_str(parses))
 
 def debug():
     while True:
