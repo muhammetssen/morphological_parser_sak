@@ -1,0 +1,17 @@
+{
+  "name": "root",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "textarea": {
+        "type": "string",
+        "title": "Sentence(s)"
+      }
+    }
+  },
+  "uiSchema": {
+    "textarea": {
+      "ui:widget": "textarea"
+    }
+  }
+}

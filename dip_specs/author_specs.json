@@ -1,0 +1,12 @@
+{
+    "paper_name": "Morphological Parser, Morphological Disambiguator and Web Corpus",
+    "paper_handle": "https://doi.org/10.1007/978-3-540-85287-2_40",
+    "paper_authors": "Haşim Sak, Tunga Güngör, Murat Saraçlar",
+    "program_authors": "Haşim Sak",
+    "program_link": "https://github.com/tabilab-dip/morphological_parser_sak",
+    "task_name": "Morphological Analysis and Disambiguation",
+    "task_description": "Morphological Analysis is the process of finding the correct morphemes of a word and it generates set of possible morphological parsings for a sentence. Morphological Disambiguation chooses the most likely Morphological parse from this set",
+    "usage_info": "Write each sentence in a newline. End-of-sentence markers should be seperated from the previous token with white spaces. \n\nExample:\n \"Şekerleri yedim .\"\n\"Eve gittim .\"",
+    "example_sentences": [  "şekerleri yedim .\neve geldim .", 
+                            "Bugun okula otobüsle gittim ."]
+}
