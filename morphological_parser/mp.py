@@ -104,7 +104,7 @@ def get_parses_dict(text):
 
 def pprint_str(parses):
     ret = ""
-    for sentence in parses["sentences"]:
+    for sentence in parses:
         for word_dict in sentence:
             word, parses_word = word_dict["word"], word_dict["parses"]
             ret += word + "\n"
