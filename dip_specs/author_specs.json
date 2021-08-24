@@ -1,4 +1,4 @@
-{
+  {
     
     "tr": {
         "project_name": "Morfolojik Analiz",
@@ -13,7 +13,7 @@
 
         "task_description": "Morphological analysis is the process of extracting the morphological parses (root form, affixes, and morphological features) of a given word (token). Given a word, the morphological analyzer outputs all possible morphological parses of the word. The output of the morphological analyzer is normally fed later to the morphological disambiguator tool, which determines the correct morphological parse of the word (among all its possible morphological parses) based on the context.",
         
-        "usage_info": "Input: List of TokenizedSentences \n The input to the morphological analyzer is one or more tokenized sentences. That is, for each sentence, ach token (including punctuations) must be separated by white space characters. Each sentence must e written on a separate line. \n\n Output: For each token in the sentences, a list of morphological parses \n The output is a list of morphological parses for each token in the sentences. The sentences are eparated by hypenated lines. For each token, first the input token is written, which is followed by the ossible morphological parses (one per line) of the token. A morphological parse consists of the root orm and its part-of-speech (e.g. “şeker[Noun]” in one of the parses below), followed by a (possibly mpty) list of suffixes, morphological features, and parts-of-speech. More information about the omponents of a morphological parse can be found in the citations below.    
+        "usage_info": "Input: List of TokenizedSentences \n The input to the morphological analyzer is one or more tokenized sentences. That is, for each sentence, ach token (including punctuations) must be separated by white space characters. Each sentence must e written on a separate line. \n\n Output: For each token in the sentences, a list of morphological parses \n The output is a list of morphological parses for each token in the sentences. The sentences are eparated by hypenated lines. For each token, first the input token is written, which is followed by the ossible morphological parses (one per line) of the token. A morphological parse consists of the root orm and its part-of-speech (e.g. \\“ şeker[Noun]\\” in one of the parses below), followed by a (possibly mpty) list of suffixes, morphological features, and parts-of-speech. More information about the omponents of a morphological parse can be found in the citations below."    
     },
 
 
