@@ -68,14 +68,14 @@ def parse_lines(lines):
         parsed_text += "</S> </S>+ESTag\n"
     return parsed_text
 
-def evaluate(text):
+def evaluate(text,addAll):
     lines = [line for line in text.split("\n") if line]
     parsed_text = parse_lines(lines)
-    result = md.disamb(parsed_text)
+    result = md.disamb(parsed_text,addAll)
     return result
 
-def get_parses_dict(text):
-    output = evaluate(text)
+def get_parses_dict(text,addAll):
+    output = evaluate(text,addAll)
     parses = []
     sentence = list()
     for l in output.split("\n"):

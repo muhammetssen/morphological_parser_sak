@@ -9,7 +9,7 @@ MODEL_RE = re.compile(r"([^\s]*)\s+(.*)")
 FEAT_SEP_RE = re.compile(r"([\+\-][^\[\]]+\[)")
 avgw = defaultdict(int)
 
-def disamb(amb_text):
+def disamb(amb_text,addAll):
     """
     amb_test: str
     """
@@ -26,10 +26,11 @@ def disamb(amb_text):
             best_score, best_parse_arr = best_parse(all_parses)
             for i, word in enumerate(words):
                 result += "{} {}".format(word, best_parse_arr[i])
-                parses = re.split(r"\s+", all_parses[i])
-                for parse in parses:
-                    if parse != best_parse_arr[i]:
-                        result += " {}".format(parse)
+                if addAll:
+                    parses = re.split(r"\s+", all_parses[i])
+                    for parse in parses:
+                        if parse != best_parse_arr[i]:
+                            result += " {}".format(parse)
                 result += "\n"
             result += "{}\n".format(line);
             words = []
