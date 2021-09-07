@@ -6,6 +6,8 @@
 # 
 FROM ubuntu:16.04
 RUN apt-get -y update
+RUN apt-get install -y apt-transport-https
+
 RUN apt install software-properties-common -y
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get update
